@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthContext from "../AuthProvider/AuthContext.jsx";
+import AuthContext from "../AuthProvider/AuthContext";
 
 const Login = () => {
     const { login } = useContext(AuthContext);
@@ -12,11 +12,12 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        try {
-            await login(email, password);
-            navigate("/dashboard"); // Redirect on success
-        } catch (err) {
+        const response = await login(email, password);
+
+        if (response?.error) {
             setError("Invalid email or password. Please try again.");
+        } else {
+            navigate("/dashboard"); // Redirect on success
         }
     };
 

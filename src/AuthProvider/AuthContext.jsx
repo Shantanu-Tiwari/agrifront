@@ -6,7 +6,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(null); // Start as null
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -14,9 +14,9 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
 
-        console.log("Auth Initialization - Path:", location.pathname, "Token:", token);
+        console.log("🔄 Checking Auth - Path:", location.pathname, "Token:", token);
 
-        if (token && token !== "undefined" && token !== "null" && storedUser) {
+        if (token && storedUser) {
             setUser(JSON.parse(storedUser));
             setIsAuthenticated(true);
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
                 navigate("/login", { replace: true });
             }
         }
-    }, [navigate, location.pathname]);
+    }, []);
 
     const signup = async (name, email, password) => {
         try {
@@ -40,20 +40,18 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
 
-            if (data && data.user && data.token) {
+            if (data?.user && data?.token) {
                 setUser(data.user);
                 setIsAuthenticated(true);
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("token", data.token);
                 axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
-                console.log("Signup successful - Navigating to /dashboard");
+                console.log("✅ Signup successful - Navigating to /dashboard");
                 navigate("/dashboard");
-                return { success: true };
             }
         } catch (error) {
-            console.error("Signup error:", error.response?.data?.error || "Connection error");
-            return error.response?.data || { error: "Connection error. Please try again." };
+            console.error("❌ Signup error:", error.response?.data?.error || "Connection error");
         }
     };
 
@@ -64,35 +62,27 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
 
-            if (data?.user && data?.token) {
-                console.log("Login successful - Token:", data.token);
+            console.log("🔥 API Response:", data); // Debug response
 
-                // ✅ Store token and user
+            if (data?.user && data?.token) {
+                console.log("✅ Login successful - Token:", data.token);
+
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
+                console.log("🛠️ Token in Storage:", localStorage.getItem("token"));
 
-                // ✅ Update state
                 setUser(data.user);
                 setIsAuthenticated(true);
-
-                // ✅ Set axios default header
                 axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
-                // ✅ Redirect to dashboard
                 navigate("/dashboard");
-
-                return { success: true };
             } else {
-                console.error("Login failed: No token received");
-                return { error: "Invalid login credentials." };
+                console.error("❌ Login failed: No token received");
             }
         } catch (error) {
-            console.error("Login error:", error.response?.data?.error || error);
-            return { error: "Login failed. Please try again." };
+            console.error("❌ Login error:", error.response?.data?.error || "Login failed.");
         }
     };
-
-
 
     const logout = () => {
         setUser(null);
