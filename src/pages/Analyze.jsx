@@ -28,7 +28,7 @@ const Analyze = () => {
 
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://localhost:5000/api/upload", {
+            const res = await fetch("https://agriback-mj37.onrender.com/api/upload", {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData,

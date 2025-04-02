@@ -25,7 +25,7 @@ export const AuthProvider = ({children}) => {
 
     const signup = async (name, email, password) => {
         try {
-            const { data } = await axios.post("http://localhost:5000/auth/signup", {
+            const { data } = await axios.post("https://agriback-mj37.onrender.com/auth/signup", {
                 name,
                 email,
                 password,
@@ -50,7 +50,7 @@ export const AuthProvider = ({children}) => {
 
     const login = async (email, password) => {
         try {
-            const { data } = await axios.post("http://localhost:5000/auth/login", {
+            const { data } = await axios.post("https://agriback-mj37.onrender.com/auth/login", {
                 email,
                 password,
             });

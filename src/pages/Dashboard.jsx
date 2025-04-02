@@ -16,7 +16,7 @@ const Dashboard = () => {
             }
 
             try {
-                const res = await fetch("http://localhost:5000/api/reports", {
+                const res = await fetch("https://agriback-mj37.onrender.com/api/reports", {
                     method: "GET", // Explicitly set method
                     headers: {
                         "Authorization": `Bearer ${token}`,
