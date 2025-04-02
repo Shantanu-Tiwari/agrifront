@@ -6,22 +6,46 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
     const [user, setUser] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Check both token and user on initial load
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+
+        console.log("Auth initialization - Token:", token);
+        console.log("Auth initialization - User:", storedUser);
+
         try {
-            const storedUser = localStorage.getItem("user");
-            if (storedUser && storedUser !== "undefined") {
+            if (token && token !== "undefined" && token !== "null" &&
+                storedUser && storedUser !== "undefined") {
                 setUser(JSON.parse(storedUser));
+                setIsAuthenticated(true);
+
+                // Set up axios with the auth token for all subsequent requests
+                axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
             } else {
                 setUser(null);
+                setIsAuthenticated(false);
+                delete axios.defaults.headers.common["Authorization"];
+
+                // Only navigate to login if we're not already there and not signing up
+                const currentPath = window.location.pathname;
+                if (currentPath !== "/login" && currentPath !== "/signup" && currentPath !== "/") {
+                    navigate("/login");
+                }
             }
         } catch (error) {
-            console.error("Error parsing stored user data:", error);
+            console.error("Error initializing auth:", error);
             setUser(null);
-            localStorage.removeItem("user"); // Clean up invalid data
+            setIsAuthenticated(false);
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            delete axios.defaults.headers.common["Authorization"];
+            navigate("/login");
         }
-    }, []);
+    }, [navigate]);
 
     const signup = async (name, email, password) => {
         try {
@@ -31,11 +55,18 @@ export const AuthProvider = ({children}) => {
                 password,
             });
 
-            if (data && data.user) {
+            if (data && data.user && data.token) {
                 setUser(data.user);
+                setIsAuthenticated(true);
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("token", data.token);
+
+                // Set Authorization header for future requests
+                axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
+                console.log("Signup successful - Token set:", data.token);
                 navigate("/dashboard");
+                return { success: true };
             }
         } catch (error) {
             if(error.response){
@@ -55,11 +86,18 @@ export const AuthProvider = ({children}) => {
                 password,
             });
 
-            if (data && data.user) {
+            if (data && data.user && data.token) {
                 setUser(data.user);
+                setIsAuthenticated(true);
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("token", data.token);
+
+                // Set Authorization header for future requests
+                axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
+                console.log("Login successful - Token set:", data.token);
                 navigate("/dashboard");
+                return { success: true };
             }
         } catch (error) {
             if(error.response){
@@ -74,13 +112,15 @@ export const AuthProvider = ({children}) => {
 
     const logout = () => {
         setUser(null);
+        setIsAuthenticated(false);
         localStorage.removeItem("user");
-        localStorage.removeItem("token"); // Also remove token
+        localStorage.removeItem("token");
+        delete axios.defaults.headers.common["Authorization"];
         navigate("/login");
     };
 
     return (
-        <AuthContext.Provider value={{user, signup, login, logout}}>
+        <AuthContext.Provider value={{user, isAuthenticated, signup, login, logout}}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,14 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { useContext } from "react";
+import AuthContext from "../AuthProvider/AuthContext"; // Adjust the import path as needed
 
 const ProtectedRoute = () => {
-    // Check if there's a valid token in localStorage
-    const token = localStorage.getItem("token");
+    const { isAuthenticated } = useContext(AuthContext);
 
-    // Add validation for the token to ensure it's not just empty or malformed
-    const isValidToken = token && token.trim() !== "" && token !== "undefined";
+    console.log("ProtectedRoute - isAuthenticated:", isAuthenticated);
+    console.log("ProtectedRoute - Current path:", window.location.pathname);
 
-    // Only redirect to login if the token is invalid or missing
-    return isValidToken ? <Outlet /> : <Navigate to="/login" replace />;
+    // Use the authentication state from context
+    return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;
