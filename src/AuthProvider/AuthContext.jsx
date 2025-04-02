@@ -64,22 +64,35 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
 
-            if (data && data.user && data.token) {
+            if (data?.user && data?.token) {
+                console.log("Login successful - Token:", data.token);
+
+                // ✅ Store token and user
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+
+                // ✅ Update state
                 setUser(data.user);
                 setIsAuthenticated(true);
-                localStorage.setItem("user", JSON.stringify(data.user));
-                localStorage.setItem("token", data.token);
+
+                // ✅ Set axios default header
                 axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
-                console.log("Login successful - Navigating to /dashboard");
+                // ✅ Redirect to dashboard
                 navigate("/dashboard");
+
                 return { success: true };
+            } else {
+                console.error("Login failed: No token received");
+                return { error: "Invalid login credentials." };
             }
         } catch (error) {
-            console.error("Login error:", error.response?.data?.error || "Connection error");
-            return error.response?.data || { error: "Connection error. Please try again." };
+            console.error("Login error:", error.response?.data?.error || error);
+            return { error: "Login failed. Please try again." };
         }
     };
+
+
 
     const logout = () => {
         setUser(null);
