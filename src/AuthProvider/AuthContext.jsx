@@ -6,7 +6,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(null); // Start as null
+    const [isAuthenticated, setIsAuthenticated] = useState(null); // 🔥 Fix: Start as null
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -25,12 +25,11 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(false);
             delete axios.defaults.headers.common["Authorization"];
 
-            // 🚀 Prevent redirecting if already on login or signup
             if (!["/login", "/signup"].includes(location.pathname)) {
                 navigate("/login", { replace: true });
             }
         }
-    }, []);
+    }, []); // ✅ Runs only on mount
 
     const signup = async (name, email, password) => {
         try {
@@ -46,8 +45,6 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("token", data.token);
                 axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
-
-                console.log("✅ Signup successful - Navigating to /dashboard");
                 navigate("/dashboard");
             }
         } catch (error) {
@@ -62,19 +59,17 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
 
-            console.log("🔥 API Response:", data); // Debug response
+            console.log("🔥 API Response:", data);
 
             if (data?.user && data?.token) {
                 console.log("✅ Login successful - Token:", data.token);
 
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
-                console.log("🛠️ Token in Storage:", localStorage.getItem("token"));
 
                 setUser(data.user);
                 setIsAuthenticated(true);
                 axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
-
                 navigate("/dashboard");
             } else {
                 console.error("❌ Login failed: No token received");

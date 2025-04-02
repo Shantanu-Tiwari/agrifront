@@ -1,29 +1,20 @@
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useContext } from "react";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import Header from "./components/Header.jsx";
-import { useState, useEffect } from "react";
 import Analyze from "./pages/Analyze.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import AuthContext from "./AuthProvider/AuthContext";
 
 function App() {
     const location = useLocation();
+    const { isAuthenticated } = useContext(AuthContext); // ✅ Use AuthContext globally
     const noSidebarRoutes = ["/login", "/signup"];
     const showSidebar = !noSidebarRoutes.includes(location.pathname);
-    const [sidebarWidth, setSidebarWidth] = useState(256); // Default open width
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Check authentication on component mount and when location changes
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        const isValid = !!token && token !== "undefined" && token !== "null";
-        setIsAuthenticated(isValid);
-        console.log("Current path:", location.pathname, "Auth status:", isValid);
-    }, [location]);
-
-    // Set page title based on current route
     const getPageTitle = () => {
         switch (location.pathname) {
             case "/dashboard":
@@ -43,12 +34,9 @@ function App() {
 
     return (
         <div className="flex min-h-screen">
-            {showSidebar && <Sidebar onWidthChange={(width) => setSidebarWidth(width)} />}
+            {showSidebar && <Sidebar />}
 
-            <div
-                className="flex flex-col flex-grow transition-all duration-300"
-                style={{ marginLeft: showSidebar ? `${sidebarWidth}px` : "0" }}
-            >
+            <div className="flex flex-col flex-grow transition-all duration-300">
                 {showSidebar && <Header title={getPageTitle()} />}
 
                 <main className="flex-grow">
@@ -63,17 +51,9 @@ function App() {
                             <Route path="/analyze" element={<Analyze />} />
                         </Route>
 
-                        {/* Redirect root path */}
-                        <Route
-                            path="/"
-                            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
-                        />
-
-                        {/* Catch all other routes */}
-                        <Route
-                            path="*"
-                            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
-                        />
+                        {/* Redirect based on auth state */}
+                        <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
+                        <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
                     </Routes>
                 </main>
             </div>
