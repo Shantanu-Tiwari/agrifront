@@ -4,7 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import Header from "./components/Header.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Analyze from "./pages/Analyze.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
@@ -13,6 +13,13 @@ function App() {
     const noSidebarRoutes = ["/login", "/signup"];
     const showSidebar = !noSidebarRoutes.includes(location.pathname);
     const [sidebarWidth, setSidebarWidth] = useState(256); // Default open width
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    // Check authentication on component mount and when location changes
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        setIsAuthenticated(token && token.trim() !== "" && token !== "undefined");
+    }, [location]);
 
     // Set page title based on current route
     const getPageTitle = () => {
@@ -52,7 +59,13 @@ function App() {
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/analyze" element={<Analyze />} />
                         </Route>
-                        <Route path="*" element={<Navigate to="/signup" />} />
+
+                        {/* Default route - direct to dashboard if authenticated, signup if not */}
+                        <Route path="*" element={
+                            isAuthenticated ?
+                                <Navigate to="/dashboard" /> :
+                                <Navigate to="/login" />
+                        } />
                     </Routes>
                 </main>
             </div>
