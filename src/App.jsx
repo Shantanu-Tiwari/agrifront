@@ -18,7 +18,9 @@ function App() {
     // Check authentication on component mount and when location changes
     useEffect(() => {
         const token = localStorage.getItem("token");
-        setIsAuthenticated(!!token && token !== "undefined" && token !== "null");
+        const isValid = !!token && token !== "undefined" && token !== "null";
+        setIsAuthenticated(isValid);
+        console.log("Current path:", location.pathname, "Auth status:", isValid);
     }, [location]);
 
     // Set page title based on current route
