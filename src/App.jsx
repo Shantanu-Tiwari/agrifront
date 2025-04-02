@@ -52,15 +52,24 @@ function App() {
 
                 <main className="flex-grow">
                     <Routes>
-                        <Route path="/signup" element={<Signup />} />
-                        <Route path="/login" element={<Login />} />
+                        {/* Public routes */}
+                        <Route path="signup" element={<Signup />} />
+                        <Route path="login" element={<Login />} />
 
+                        {/* Protected routes */}
                         <Route element={<ProtectedRoute/>}>
-                            <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/analyze" element={<Analyze />} />
+                            <Route path="dashboard" element={<Dashboard />} />
+                            <Route path="analyze" element={<Analyze />} />
                         </Route>
 
-                        {/* Default route - direct to dashboard if authenticated, signup if not */}
+                        {/* Redirect root path */}
+                        <Route path="/" element={
+                            isAuthenticated ?
+                                <Navigate to="/dashboard" /> :
+                                <Navigate to="/login" />
+                        } />
+
+                        {/* Catch all other routes */}
                         <Route path="*" element={
                             isAuthenticated ?
                                 <Navigate to="/dashboard" /> :
