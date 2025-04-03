@@ -61,13 +61,21 @@ export const AuthProvider = ({ children }) => {
 
             console.log("🔥 API Response:", data);
 
-            if (data?.user && data?.token) {
+            // Check if token exists directly in the response
+            if (data?.token) {
                 console.log("✅ Login successful - Token:", data.token);
 
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
+                // Either store the entire data object as user or extract relevant fields
+                const userData = {
+                    id: data._id,
+                    name: data.name,
+                    email: data.email
+                };
 
-                setUser(data.user);
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(userData));
+
+                setUser(userData);
                 setIsAuthenticated(true);
                 axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
                 navigate("/dashboard");
