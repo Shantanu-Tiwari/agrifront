@@ -33,13 +33,21 @@ function App() {
     };
 
     return (
-        <div className="flex min-h-screen">
-            {showSidebar && <Sidebar />}
+        <div className="flex min-h-screen bg-gray-50">
+            {showSidebar && (
+                <div className="w-64 fixed inset-y-0 left-0 z-30 bg-white shadow-lg">
+                    <Sidebar />
+                </div>
+            )}
 
-            <div className="flex flex-col flex-grow transition-all duration-300">
-                {showSidebar && <Header title={getPageTitle()} />}
+            <div className={`flex flex-col flex-grow transition-all duration-300 ${showSidebar ? 'ml-64' : ''}`}>
+                {showSidebar && (
+                    <div className="sticky top-0 z-20 bg-white shadow-sm">
+                        <Header title={getPageTitle()} />
+                    </div>
+                )}
 
-                <main className="flex-grow">
+                <main className="flex-grow p-6 pt-4">
                     <Routes>
                         {/* Public routes */}
                         <Route path="/signup" element={<Signup />} />
