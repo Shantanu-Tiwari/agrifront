@@ -1,7 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Flower2, Search, UserRoundSearch } from "lucide-react";
 import { Link } from "react-router-dom";
+
+// Create a new context to manage sidebar state globally
+import { createContext } from "react";
+
+// This would typically be in a separate file
+export const SidebarContext = createContext({
+    isSidebarOpen: true,
+    toggleSidebar: () => {},
+});
 
 const SIDEBAR_ITEMS = [
     { name: "Dashboard", icon: Flower2, color: "#097969", path: "/dashboard" },
@@ -9,17 +18,11 @@ const SIDEBAR_ITEMS = [
     { name: "Advice", icon: UserRoundSearch, color: "#00FFFF", path: "/experts" },
 ];
 
-const Sidebar = ({ onWidthChange }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+const Sidebar = () => {
+    // Get sidebar state from context instead of local state
+    const { isSidebarOpen, toggleSidebar } = useContext(SidebarContext);
     const openWidth = 256;
     const closedWidth = 80;
-
-    // Communicate width changes to parent component
-    useEffect(() => {
-        if (onWidthChange) {
-            onWidthChange(isSidebarOpen ? openWidth : closedWidth);
-        }
-    }, [isSidebarOpen, onWidthChange]);
 
     return (
         <motion.div
@@ -31,7 +34,7 @@ const Sidebar = ({ onWidthChange }) => {
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => setIsSidebarOpen((prev) => !prev)}
+                    onClick={toggleSidebar}
                     className="p-2 rounded-full hover:bg-gray-700 transition-colors max-w-fit self-start"
                 >
                     <Menu size={24} />
