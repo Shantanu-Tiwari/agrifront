@@ -8,7 +8,7 @@ import Header from "./components/Header.jsx";
 import Analyze from "./pages/Analyze.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AuthContext from "./AuthProvider/AuthContext";
-
+import ExpertsPage from "./pages/ExpertsPage.jsx";
 function App() {
     const location = useLocation();
     const { isAuthenticated } = useContext(AuthContext);
@@ -61,6 +61,7 @@ function App() {
                             <Route element={<ProtectedRoute />}>
                                 <Route path="/dashboard" element={<Dashboard />} />
                                 <Route path="/analyze" element={<Analyze />} />
+                                <Route path="/experts" element={<ExpertsPage />} />
                             </Route>
 
                             {/* Redirect based on auth state */}
