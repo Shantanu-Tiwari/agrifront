@@ -4,6 +4,7 @@ const Dashboard = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedReport, setSelectedReport] = useState(null); // To track clicked report
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -28,8 +29,6 @@ const Dashboard = () => {
                 }
 
                 const data = await res.json();
-                console.log("Fetched Reports Data:", data);
-
                 setReports(Array.isArray(data) ? data : data.reports || []);
             } catch (error) {
                 console.error("Error fetching reports:", error);
@@ -55,7 +54,11 @@ const Dashboard = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {reports.map((report) => (
-                        <div key={report._id || report.id} className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+                        <div
+                            key={report._id || report.id}
+                            className="bg-white shadow-md rounded-lg p-4 border border-gray-200 cursor-pointer transition-transform transform hover:scale-105"
+                            onClick={() => setSelectedReport(report)}
+                        >
                             <img
                                 src={report.imageUrl || "/placeholder-image.jpg"}
                                 alt="Report"
@@ -78,6 +81,33 @@ const Dashboard = () => {
                             </p>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Modal for detailed view */}
+            {selectedReport && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+                        <button
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                            onClick={() => setSelectedReport(null)}
+                        >
+                            ✕
+                        </button>
+                        <img
+                            src={selectedReport.imageUrl}
+                            alt="Full View"
+                            className="w-full h-auto rounded-lg mb-4"
+                        />
+                        <p className="text-gray-800"><strong>Name:</strong> {selectedReport.name || "Disease Report"}</p>
+                        <p className="text-gray-800"><strong>Status:</strong> {selectedReport.status || "Unknown"}</p>
+                        <p className="text-gray-700"><strong>Result:</strong> {selectedReport.analysisResult || "No results available"}</p>
+                        <p className="text-gray-600 text-sm"><strong>Date:</strong> {selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleDateString() : "Unknown date"}</p>
+
+                        <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            Know More
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
