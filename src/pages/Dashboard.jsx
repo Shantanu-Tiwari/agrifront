@@ -8,7 +8,6 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchReports = async () => {
             const token = localStorage.getItem("token");
-
             if (!token) {
                 setError("No authentication token found.");
                 setLoading(false);
@@ -24,30 +23,17 @@ const Dashboard = () => {
                     },
                 });
 
-                console.log("Response status:", res.status);
-
                 if (!res.ok) {
-                    const errorData = await res.text();
-                    console.error("API error response:", errorData);
                     throw new Error(`Failed to fetch reports: ${res.status}`);
                 }
 
                 const data = await res.json();
                 console.log("Fetched Reports Data:", data);
 
-                // Check if data is an array or has a reports field
-                if (Array.isArray(data)) {
-                    setReports(data);
-                } else if (data.reports && Array.isArray(data.reports)) {
-                    setReports(data.reports);
-                } else {
-                    console.error("Unexpected API response format:", data);
-                    setReports([]);
-                }
+                setReports(Array.isArray(data) ? data : data.reports || []);
             } catch (error) {
                 console.error("Error fetching reports:", error);
                 setError(`Error fetching reports: ${error.message}`);
-                setReports([]);
             } finally {
                 setLoading(false);
             }
@@ -77,7 +63,7 @@ const Dashboard = () => {
                                 onError={(e) => { e.target.src = "/placeholder-image.jpg"; }}
                             />
                             <p className="text-gray-800">
-                                <strong>Name:</strong> {report.name || "Unnamed Report"}
+                                <strong>Name:</strong> {report.name || "Disease Report"}
                             </p>
                             <p className="text-gray-800">
                                 <strong>Status:</strong> {report.status || "Unknown"}
