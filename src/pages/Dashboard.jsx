@@ -43,7 +43,6 @@ const Dashboard = () => {
         fetchReports();
     }, []);
 
-    // Function to fetch AI-generated details
     const handleKnowMore = async () => {
         if (!selectedReport || !selectedReport.analysisResult) {
             setAiResponse("No valid analysis result available.");
@@ -54,7 +53,6 @@ const Dashboard = () => {
         setAiResponse(null);
 
         const queryPayload = { query: `Explain ${selectedReport.analysisResult}. Provide its cure and prevention.` };
-        console.log("Sending request payload:", queryPayload); // Debugging log
 
         try {
             const res = await fetch("https://agriback-mj37.onrender.com/api/gemini", {
@@ -80,7 +78,6 @@ const Dashboard = () => {
         }
     };
 
-
     return (
         <div className="bg-green-50 min-h-screen p-6">
             <h1 className="text-2xl font-semibold text-gray-800 mb-6">Previous Reports</h1>
@@ -96,7 +93,7 @@ const Dashboard = () => {
                     {reports.map((report) => (
                         <div
                             key={report._id || report.id}
-                            className="bg-white shadow-md rounded-lg p-4 border border-gray-200 cursor-pointer transition-transform transform hover:scale-105"
+                            className="bg-white shadow-lg rounded-lg p-4 border border-gray-200 cursor-pointer transition-transform transform hover:scale-105"
                             onClick={() => setSelectedReport(report)}
                         >
                             <img
@@ -105,12 +102,12 @@ const Dashboard = () => {
                                 className="w-full h-40 object-cover rounded-md mb-4"
                                 onError={(e) => { e.target.src = "/placeholder-image.jpg"; }}
                             />
-                            <p className="text-gray-800"><strong>Name:</strong> {report.name || "Disease Report"}</p>
-                            <p className="text-gray-800"><strong>Status:</strong> {report.status || "Unknown"}</p>
+                            <p className="text-gray-800 font-medium"><strong>Name:</strong> {report.name || "Disease Report"}</p>
+                            <p className="text-gray-700"><strong>Status:</strong> {report.status || "Unknown"}</p>
                             {report.status === "Processed" && (
-                                <p className="text-gray-700"><strong>Result:</strong> {report.analysisResult || "No results available"}</p>
+                                <p className="text-gray-600"><strong>Result:</strong> {report.analysisResult || "No results available"}</p>
                             )}
-                            <p className="text-gray-600 text-sm mt-2"><strong>Date:</strong> {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "Unknown date"}</p>
+                            <p className="text-gray-500 text-sm mt-2"><strong>Date:</strong> {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "Unknown date"}</p>
                         </div>
                     ))}
                 </div>
@@ -118,30 +115,16 @@ const Dashboard = () => {
 
             {/* Modal for detailed view */}
             {selectedReport && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                    onClick={() => { setSelectedReport(null); setAiResponse(null); }} // Close when clicking outside
-                >
-                    <div
-                        className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
-                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
-                    >
-                        <button
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-                            onClick={() => { setSelectedReport(null); setAiResponse(null); }}
-                        >
-                            ✕
-                        </button>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => { setSelectedReport(null); setAiResponse(null); }}>
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full relative" onClick={(e) => e.stopPropagation()}>
+                        <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-800" onClick={() => { setSelectedReport(null); setAiResponse(null); }}>✕</button>
                         <img src={selectedReport.imageUrl} alt="Full View" className="w-full h-auto rounded-lg mb-4" />
-                        <p className="text-gray-800"><strong>Name:</strong> {selectedReport.name || "Disease Report"}</p>
-                        <p className="text-gray-800"><strong>Status:</strong> {selectedReport.status || "Unknown"}</p>
-                        <p className="text-gray-700"><strong>Result:</strong> {selectedReport.analysisResult || "No results available"}</p>
-                        <p className="text-gray-600 text-sm"><strong>Date:</strong> {selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleDateString() : "Unknown date"}</p>
+                        <p className="text-gray-800 font-semibold"><strong>Name:</strong> {selectedReport.name || "Disease Report"}</p>
+                        <p className="text-gray-700"><strong>Status:</strong> {selectedReport.status || "Unknown"}</p>
+                        <p className="text-gray-600"><strong>Result:</strong> {selectedReport.analysisResult || "No results available"}</p>
+                        <p className="text-gray-500 text-sm"><strong>Date:</strong> {selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleDateString() : "Unknown date"}</p>
 
-                        <button
-                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                            onClick={handleKnowMore}
-                        >
+                        <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" onClick={handleKnowMore}>
                             Know More
                         </button>
                     </div>
@@ -150,25 +133,16 @@ const Dashboard = () => {
 
             {/* AI Response Popup */}
             {aiResponse && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                    onClick={() => setAiResponse(null)} // Close when clicking outside
-                >
-                    <div
-                        className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
-                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
-                    >
-                        <button
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-                            onClick={() => setAiResponse(null)}
-                        >
-                            ✕
-                        </button>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setAiResponse(null)}>
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-800" onClick={() => setAiResponse(null)}>✕</button>
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">AI Analysis</h2>
                         {loadingAI ? (
                             <p className="text-gray-600">Fetching details...</p>
                         ) : (
-                            <p className="text-gray-700">{aiResponse}</p>
+                            <div className="max-h-64 overflow-y-auto border border-gray-300 p-3 rounded-md bg-gray-50 text-gray-700 whitespace-pre-wrap">
+                                {aiResponse}
+                            </div>
                         )}
                     </div>
                 </div>
