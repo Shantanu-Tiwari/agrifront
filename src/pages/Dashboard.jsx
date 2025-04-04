@@ -4,7 +4,7 @@ const Dashboard = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedReport, setSelectedReport] = useState(null); // To track clicked report
+    const [selectedReport, setSelectedReport] = useState(null);
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -86,8 +86,14 @@ const Dashboard = () => {
 
             {/* Modal for detailed view */}
             {selectedReport && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    onClick={() => setSelectedReport(null)} // Close when clicking outside
+                >
+                    <div
+                        className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
+                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+                    >
                         <button
                             className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
                             onClick={() => setSelectedReport(null)}
