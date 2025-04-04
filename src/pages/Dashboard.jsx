@@ -45,10 +45,16 @@ const Dashboard = () => {
 
     // Function to fetch AI-generated details
     const handleKnowMore = async () => {
-        if (!selectedReport) return;
+        if (!selectedReport || !selectedReport.analysisResult) {
+            setAiResponse("No valid analysis result available.");
+            return;
+        }
 
         setLoadingAI(true);
         setAiResponse(null);
+
+        const queryPayload = { query: `Explain ${selectedReport.analysisResult}. Provide its cure and prevention.` };
+        console.log("Sending request payload:", queryPayload); // Debugging log
 
         try {
             const res = await fetch("https://agriback-mj37.onrender.com/api/gemini", {
@@ -56,13 +62,16 @@ const Dashboard = () => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ query: `Explain ${selectedReport.analysisResult} and its cure and prevention.` })
+                body: JSON.stringify(queryPayload)
             });
 
-            if (!res.ok) throw new Error("Failed to fetch AI response.");
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Failed to fetch AI response. Status: ${res.status}, Message: ${errorText}`);
+            }
 
             const data = await res.json();
-            setAiResponse(data.response || "No additional details available.");
+            setAiResponse(data.result || "No additional details available.");
         } catch (error) {
             console.error("Error fetching AI response:", error);
             setAiResponse("Failed to fetch AI details.");
@@ -70,6 +79,7 @@ const Dashboard = () => {
             setLoadingAI(false);
         }
     };
+
 
     return (
         <div className="bg-green-50 min-h-screen p-6">
