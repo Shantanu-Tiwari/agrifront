@@ -1,7 +1,4 @@
 import { useEffect, useState } from "react";
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
 const Dashboard = () => {
     const [reports, setReports] = useState([]);
@@ -46,21 +43,29 @@ const Dashboard = () => {
         fetchReports();
     }, []);
 
+    // Function to fetch AI-generated details
     const handleKnowMore = async () => {
         if (!selectedReport) return;
+
         setLoadingAI(true);
         setAiResponse(null);
 
         try {
-            const response = await ai.models.generateContent({
-                model: "gemini-2.0-flash",
-                contents: `Explain the disease: ${selectedReport.analysisResult}. Provide its cure and prevention.`,
+            const res = await fetch("https://agriback-mj37.onrender.com/api/gemini", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ query: `Explain ${selectedReport.analysisResult} and its cure and prevention.` })
             });
 
-            setAiResponse(response.text);
-        } catch (err) {
-            console.error("Error fetching AI response:", err);
-            setAiResponse("Failed to fetch AI response.");
+            if (!res.ok) throw new Error("Failed to fetch AI response.");
+
+            const data = await res.json();
+            setAiResponse(data.response || "No additional details available.");
+        } catch (error) {
+            console.error("Error fetching AI response:", error);
+            setAiResponse("Failed to fetch AI details.");
         } finally {
             setLoadingAI(false);
         }
@@ -90,20 +95,12 @@ const Dashboard = () => {
                                 className="w-full h-40 object-cover rounded-md mb-4"
                                 onError={(e) => { e.target.src = "/placeholder-image.jpg"; }}
                             />
-                            <p className="text-gray-800">
-                                <strong>Name:</strong> {report.name || "Disease Report"}
-                            </p>
-                            <p className="text-gray-800">
-                                <strong>Status:</strong> {report.status || "Unknown"}
-                            </p>
+                            <p className="text-gray-800"><strong>Name:</strong> {report.name || "Disease Report"}</p>
+                            <p className="text-gray-800"><strong>Status:</strong> {report.status || "Unknown"}</p>
                             {report.status === "Processed" && (
-                                <p className="text-gray-700">
-                                    <strong>Result:</strong> {report.analysisResult || "No results available"}
-                                </p>
+                                <p className="text-gray-700"><strong>Result:</strong> {report.analysisResult || "No results available"}</p>
                             )}
-                            <p className="text-gray-600 text-sm mt-2">
-                                <strong>Date:</strong> {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "Unknown date"}
-                            </p>
+                            <p className="text-gray-600 text-sm mt-2"><strong>Date:</strong> {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "Unknown date"}</p>
                         </div>
                     ))}
                 </div>
@@ -113,7 +110,7 @@ const Dashboard = () => {
             {selectedReport && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                    onClick={() => setSelectedReport(null)} // Close when clicking outside
+                    onClick={() => { setSelectedReport(null); setAiResponse(null); }} // Close when clicking outside
                 >
                     <div
                         className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
@@ -121,15 +118,11 @@ const Dashboard = () => {
                     >
                         <button
                             className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-                            onClick={() => setSelectedReport(null)}
+                            onClick={() => { setSelectedReport(null); setAiResponse(null); }}
                         >
                             ✕
                         </button>
-                        <img
-                            src={selectedReport.imageUrl}
-                            alt="Full View"
-                            className="w-full h-auto rounded-lg mb-4"
-                        />
+                        <img src={selectedReport.imageUrl} alt="Full View" className="w-full h-auto rounded-lg mb-4" />
                         <p className="text-gray-800"><strong>Name:</strong> {selectedReport.name || "Disease Report"}</p>
                         <p className="text-gray-800"><strong>Status:</strong> {selectedReport.status || "Unknown"}</p>
                         <p className="text-gray-700"><strong>Result:</strong> {selectedReport.analysisResult || "No results available"}</p>
@@ -145,15 +138,15 @@ const Dashboard = () => {
                 </div>
             )}
 
-            {/* Modal for AI Response */}
+            {/* AI Response Popup */}
             {aiResponse && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
                     onClick={() => setAiResponse(null)} // Close when clicking outside
                 >
                     <div
-                        className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full relative"
-                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+                        className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
+                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
                     >
                         <button
                             className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
@@ -161,11 +154,11 @@ const Dashboard = () => {
                         >
                             ✕
                         </button>
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Disease Information</h2>
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">AI Analysis</h2>
                         {loadingAI ? (
                             <p className="text-gray-600">Fetching details...</p>
                         ) : (
-                            <p className="text-gray-700 whitespace-pre-line">{aiResponse}</p>
+                            <p className="text-gray-700">{aiResponse}</p>
                         )}
                     </div>
                 </div>
