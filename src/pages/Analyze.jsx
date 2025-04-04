@@ -5,13 +5,13 @@ const Analyze = () => {
     const [preview, setPreview] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState("");
-    const [imageName, setImageName] = useState(""); // New state for image name
+    const [imageName, setImageName] = useState("");
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setImage(file);
-            setPreview(URL.createObjectURL(file)); // Preview the image
+            setPreview(URL.createObjectURL(file));
         }
     };
 
@@ -26,7 +26,7 @@ const Analyze = () => {
 
         const formData = new FormData();
         formData.append("image", image);
-        formData.append("name", imageName); // Add name field
+        formData.append("name", imageName);
 
         try {
             const token = localStorage.getItem("token");
@@ -37,12 +37,14 @@ const Analyze = () => {
             });
 
             const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || "Failed to upload image.");
-            }
+            if (!res.ok) throw new Error(data.error || "Failed to upload image.");
 
             setMessage("Image uploaded successfully! Your report is being processed.");
+
+            // ✅ Reset form after successful submission
+            setImage(null);
+            setPreview(null);
+            setImageName("");
         } catch (error) {
             setMessage(error.message);
         } finally {
@@ -66,7 +68,6 @@ const Analyze = () => {
                     <img src={preview} alt="Preview" className="w-full h-40 object-cover rounded-md mb-4" />
                 )}
 
-                {/* Input field for image name */}
                 <input
                     type="text"
                     placeholder="Enter image name"
@@ -78,7 +79,9 @@ const Analyze = () => {
                 <button
                     onClick={handleUpload}
                     disabled={uploading}
-                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                    className={`px-4 py-2 rounded-md transition ${
+                        uploading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700 text-white"
+                    }`}
                 >
                     {uploading ? "Uploading..." : "Submit for Analysis"}
                 </button>

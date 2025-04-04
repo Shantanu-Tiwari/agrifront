@@ -17,10 +17,10 @@ const Dashboard = () => {
 
             try {
                 const res = await fetch("https://agriback-mj37.onrender.com/api/reports", {
-                    method: "GET", // Explicitly set method
+                    method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json" // Add content type
+                        "Content-Type": "application/json"
                     },
                 });
 
@@ -33,12 +33,16 @@ const Dashboard = () => {
                 }
 
                 const data = await res.json();
-                console.log("Reports data:", data);
+                console.log("Fetched Reports Data:", data);
 
-                if (data && data.reports) {
-                    setReports(Array.isArray(data.reports) ? data.reports : []);
+                // Check if data is an array or has a reports field
+                if (Array.isArray(data)) {
+                    setReports(data);
+                } else if (data.reports && Array.isArray(data.reports)) {
+                    setReports(data.reports);
                 } else {
-                    setReports(Array.isArray(data) ? data : []);
+                    console.error("Unexpected API response format:", data);
+                    setReports([]);
                 }
             } catch (error) {
                 console.error("Error fetching reports:", error);
@@ -67,7 +71,7 @@ const Dashboard = () => {
                     {reports.map((report) => (
                         <div key={report._id || report.id} className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                             <img
-                                src={report.imageUrl || "/placeholder-image.jpg"} // Better fallback
+                                src={report.imageUrl || "/placeholder-image.jpg"}
                                 alt="Report"
                                 className="w-full h-40 object-cover rounded-md mb-4"
                                 onError={(e) => { e.target.src = "/placeholder-image.jpg"; }}
