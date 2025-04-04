@@ -24,7 +24,6 @@ const Dashboard = () => {
                     },
                 });
 
-                // Log response for debugging
                 console.log("Response status:", res.status);
 
                 if (!res.ok) {
@@ -36,12 +35,9 @@ const Dashboard = () => {
                 const data = await res.json();
                 console.log("Reports data:", data);
 
-                // Check the structure of the response
                 if (data && data.reports) {
-                    // If API returns { reports: [...] }
                     setReports(Array.isArray(data.reports) ? data.reports : []);
                 } else {
-                    // If API directly returns the array
                     setReports(Array.isArray(data) ? data : []);
                 }
             } catch (error) {
@@ -74,11 +70,18 @@ const Dashboard = () => {
                                 src={report.imageUrl || "/placeholder-image.jpg"} // Better fallback
                                 alt="Report"
                                 className="w-full h-40 object-cover rounded-md mb-4"
-                                onError={(e) => {e.target.src = "/placeholder-image.jpg";}}
+                                onError={(e) => { e.target.src = "/placeholder-image.jpg"; }}
                             />
-                            <p className="text-gray-800"><strong>Status:</strong> {report.status || "Unknown"}</p>
+                            <p className="text-gray-800">
+                                <strong>Name:</strong> {report.name || "Unnamed Report"}
+                            </p>
+                            <p className="text-gray-800">
+                                <strong>Status:</strong> {report.status || "Unknown"}
+                            </p>
                             {report.status === "Processed" && (
-                                <p className="text-gray-700"><strong>Result:</strong> {report.analysisResult || "No results available"}</p>
+                                <p className="text-gray-700">
+                                    <strong>Result:</strong> {report.analysisResult || "No results available"}
+                                </p>
                             )}
                             <p className="text-gray-600 text-sm mt-2">
                                 <strong>Date:</strong> {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "Unknown date"}
